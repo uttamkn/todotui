@@ -1,78 +1,115 @@
 #include <iostream>
-#include <map>
 #include <string>
-
+#include <vector>
 class Task {
   int id;
-  int priority;
   std::string desc;
 
 public:
-  Task(int id, int priority, std::string desc)
-      : id(id), priority(priority), desc(desc) {}
+  Task(int id, std::string desc) : id(id), desc(desc) {}
 
 public:
-  int getPriority() { return priority; }
   int getId() { return id; }
   std::string getTask() { return desc; }
 };
 
 class ManageTasks {
-  std::map<int, Task> tasks;
+  // TODO: try using a map instead of vector
+  std::vector<Task> tasks;
   int id;
 
-  // Constructor
-  ManageTasks() : id(0) {
-    // TODO: import all tasks from the saved file
+  void addTask(std::string desc) {
+    Task task(id++, desc);
+    tasks.push_back(task);
+    std::cout << "\n\nTask added\n\n\n";
+    // TODO: Save all tasks in a file
   }
 
-  void addTask(std::string desc, int priority = -1) {
-    Task task(id++, priority, desc);
-    tasks[task.getId()] = task;
-    // TODO: Save all tasks in a file
+  void deleteTask(int id) {
+    int i = 0;
+    for (Task task : tasks) {
+      if (task.getId() == id) {
+        tasks.erase(tasks.begin() + i);
+        std::cout << "\n\nTask deleted\n\n\n";
+        return;
+      }
+      i++;
+    }
+    std::cout << "\n\nTask not found\n\n\n";
   }
 
   void displayTasks() {
     std::cout
         << "=========================== TODOs ==============================\n";
     if (tasks.size() == 0) {
-      std::cout << "None.\n";
+      std::cout << "\nNone.\n\n";
+      std::cout << "==========================================================="
+                   "=====\n\n";
       return;
     }
 
-    for (std::pair<int, Task> task : tasks) {
-      std::cout << task.first << ". " << task.second.getTask() << "\n";
+    int idx = 1;
+    for (Task task : tasks) {
+      std::cout << idx << ". " << task.getTask() << "(id: " << task.getId()
+                << ")"
+                << "\n";
+      idx++;
     }
 
-    std::cout
-        << "================================================================\n";
+    std::cout << "============================================================="
+                 "===\n\n";
   }
 
 public:
+  // Constructor
+  ManageTasks() : id(0) {
+    // TODO: import all tasks from the saved file
+  }
+
   // User interface
   void ui() {
     using namespace std;
 
-    displayTasks();
-
     while (true) {
       // TODO: Add update functionality
-      cout << "Options: a - add a task\td - mark a task as completed\n";
-      char choice;
-      cin >> choice;
-
-      switch (choice) {
+      displayTasks();
+      cout << "Options: a - add a task\t\td - mark a task as completed\t\tq - "
+              "quit\n";
+      string choice;
+      getline(cin, choice);
+      switch (choice[0]) {
       case 'a': {
         string taskDesc;
-        char priority;
-
         cout << "Enter the task description: ";
-        cin >> taskDesc;
-        cout << "Priority(optional): ";
+        getline(cin, taskDesc);
+        addTask(taskDesc);
+      } break;
+
+      case 'd': {
+        string id;
+        cout << "Enter the task id u want to delete: ";
+        getline(cin, id);
+        // TODO:handle invalid input
+
+        deleteTask(stoi(id));
+      } break;
+
+      case 'q': {
+        cout << "exiting...\n";
+        return;
+      }
+
+      default: {
+        cout << "invalid input....exiting\n";
+        return;
       }
       }
     }
   }
 };
 
-int main() { return 0; }
+int main() {
+  ManageTasks myTasks;
+  myTasks.ui();
+  return 0;
+}
