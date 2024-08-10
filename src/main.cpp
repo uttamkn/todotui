@@ -14,7 +14,7 @@ public:
 };
 
 class ManageTasks {
-  // TODO: try using a map instead of vector
+  // TODO: try using a map instead of a vector
   std::vector<Task> tasks;
   int id;
 
@@ -86,12 +86,19 @@ public:
       } break;
 
       case 'd': {
-        string id;
+        string id_str;
+        int id;
         cout << "Enter the task id u want to delete: ";
-        getline(cin, id);
-        // TODO:handle invalid input
+        getline(cin, id_str);
 
-        deleteTask(stoi(id));
+        try {
+          id = stoi(id_str);
+        } catch (exception &ex) {
+          cout << "\n\nInvalid id\n\n\n";
+          continue;
+        }
+
+        deleteTask(id);
       } break;
 
       case 'q': {
