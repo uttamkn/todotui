@@ -1,4 +1,4 @@
 test.cpp
 *.out
 *.o
-todo_app
+build/
