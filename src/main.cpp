@@ -90,43 +90,70 @@ public:
 
     while (true) {
       displayTasks();
-      cout << "Options: a - add a task\t\td - mark a task as completed\t\tq - "
-              "quit\n";
+      cout << "=========================== Options "
+              "===========================\n";
+      cout << "a - Add a task\n";
+      cout << "d - Delete a task\n";
+      cout << "u - Update a task\n";
+      cout << "q - Quit\n";
+      cout << "==============================================================="
+              "\n";
+      cout << "Please enter your choice: ";
       string choice;
       getline(cin, choice);
       switch (choice[0]) {
       case 'a': {
         string taskDesc;
-        cout << "Enter the task description: ";
+        cout << "\nEnter the task description: ";
         getline(cin, taskDesc);
         addTask(taskDesc);
+        cout << "\nTask added successfully.\n\n";
       } break;
 
       case 'd': {
         string input_id_str;
         int input_id;
-        cout << "Enter the task id u want to delete: ";
+        cout << "\nEnter the task id u want to delete: ";
         getline(cin, input_id_str);
 
         try {
           input_id = stoi(input_id_str);
         } catch (exception &ex) {
-          cout << "\n\nInvalid id\n\n\n";
+          cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
           continue;
         }
 
         deleteTask(input_id);
       } break;
 
+      case 'u': {
+        string input_id_str;
+        int input_id;
+        string input_desc;
+        cout << "\nEnter the task id u want to update: ";
+        getline(cin, input_id_str);
+        cout << "Enter the new description: ";
+        getline(cin, input_desc);
+
+        try {
+          input_id = stoi(input_id_str);
+        } catch (exception &ex) {
+          cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
+          continue;
+        }
+
+        updateTask(input_id, input_desc);
+      } break;
+
       case 'q': {
         saveTasksToFile();
-        cout << "exiting...\n";
+        cout << "\nExiting...\n";
         return;
       }
 
       default: {
         saveTasksToFile();
-        cout << "invalid input....exiting\n";
+        cout << "\nInvalid input. Exiting...\n";
         return;
       }
       }
@@ -153,13 +180,25 @@ private:
     std::cout << "\n\nTask not found\n\n\n";
   }
 
-  // TODO: Add update functionality
+  void updateTask(int id, std::string desc) {
+    Task newTask(id, desc);
+    int i = 0;
+    for (Task task : tasks) {
+      if (task.getTaskId() == id) {
+        tasks[i] = newTask;
+        std::cout << "\n\nTask updated\n\n\n";
+        return;
+      }
+      i++;
+    }
+    std::cout << "\n\nTask not found\n\n\n";
+  }
 
   void displayTasks() {
     std::cout << "=========================== TODOs "
                  "==============================\n";
     if (tasks.size() == 0) {
-      std::cout << "\nNone.\n\n";
+      std::cout << "\nNo Tasks available.\n\n";
       std::cout << "==========================================================="
                    "=====\n\n";
       return;
