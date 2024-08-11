@@ -1,4 +1,6 @@
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -11,19 +13,51 @@ public:
   int getTaskId() const { return id; }
   std::string getTaskDesc() const { return desc; }
   std::string getTask() const {
-    return std::to_string(getTaskId()).append(" ").append(getTaskDesc());
+    return std::to_string(id).append(" ").append(desc);
   }
 };
 
-class ManageTasks {
+class TaskFile {
+  std::fstream todo_data;
+  const char *home = std::getenv("HOME");
+  std::string filepath = std::string(home) + "/.cache/todo_data.txt";
+
+protected:
+  void addTaskToFile(const Task &t) {
+    todo_data.open(filepath, std::ios::out | std::ios::app);
+    todo_data << t.getTask() << "\n";
+    todo_data.close();
+  }
+
+  void readTaskFromFile(std::vector<Task> &tasks) {
+    todo_data.open(filepath, std::ios::in);
+    std::string line;
+    while (getline(todo_data, line)) {
+      int id;
+      std::string desc;
+
+      // extract id and desc
+      std::istringstream iss(line);
+      iss >> id;
+      std::getline(iss, desc);
+      if (!desc.empty() && desc[0] == ' ') {
+        desc.erase(desc.begin());
+      }
+
+      Task task(id, desc);
+      tasks.push_back(task);
+    }
+  }
+};
+
+class ManageTasks : public TaskFile {
   // TODO: Use hashmap instead of a vector
   std::vector<Task> tasks;
   static int id;
 
 public:
   // Constructor
-  // TODO: Save all tasks in a file
-  ManageTasks() {}
+  ManageTasks() { readTaskFromFile(tasks); }
 
   // User Interface for the console
   void console_ui() {
@@ -60,11 +94,13 @@ public:
       } break;
 
       case 'q': {
+        // saveTasksToFile()
         cout << "exiting...\n";
         return;
       }
 
       default: {
+        // saveTasksToFile()
         cout << "invalid input....exiting\n";
         return;
       }
@@ -76,7 +112,7 @@ private:
   void addTask(std::string desc) {
     Task task(id++, desc);
     tasks.push_back(task);
-    // addTaskToFile()
+    addTaskToFile(task);
     std::cout << "\n\nTask added\n\n\n";
   }
 
@@ -85,7 +121,6 @@ private:
     for (Task task : tasks) {
       if (task.getTaskId() == id) {
         tasks.erase(tasks.begin() + i);
-        // deleteTaskFromFile()
         std::cout << "\n\nTask deleted\n\n\n";
         return;
       }
@@ -97,8 +132,8 @@ private:
   // TODO: Add update functionality
 
   void displayTasks() {
-    std::cout
-        << "=========================== TODOs ==============================\n";
+    std::cout << "=========================== TODOs "
+                 "==============================\n";
     if (tasks.size() == 0) {
       std::cout << "\nNone.\n\n";
       std::cout << "==========================================================="
@@ -119,6 +154,7 @@ private:
   }
 };
 
+// Initialize the static variable
 int ManageTasks::id = 0;
 
 int main() {
