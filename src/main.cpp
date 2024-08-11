@@ -1,3 +1,4 @@
+#include <csignal>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -23,13 +24,10 @@ class TaskFile {
   std::string filepath = std::string(home) + "/.cache/todo_data.txt";
 
 protected:
-  void addTaskToFile(const Task &t) {
-    todo_data.open(filepath, std::ios::out | std::ios::app);
-    todo_data << t.getTask() << "\n";
-    todo_data.close();
-  }
+  std::vector<Task> tasks;
+  // TODO: Figure out a way to add unique id to tasks (its not unique right now)
 
-  void readTaskFromFile(std::vector<Task> &tasks) {
+  void readTasksFromFile() {
     todo_data.open(filepath, std::ios::in);
     std::string line;
     while (getline(todo_data, line)) {
@@ -47,19 +45,46 @@ protected:
       Task task(id, desc);
       tasks.push_back(task);
     }
+    todo_data.close();
   }
+
+  void saveTasksToFile() {
+    // Replace old file
+    todo_data.open(filepath, std::ios::out);
+
+    for (const Task task : tasks) {
+      todo_data << task.getTask() << "\n";
+    }
+
+    todo_data.close();
+  }
+
+  static TaskFile *instance;
+
+public:
+  // Signal handler
+  static void handleSignal(int signal) {
+    instance->saveTasksToFile();
+    std::exit(signal);
+  }
+
+  TaskFile() { instance = this; }
 };
+
+TaskFile *TaskFile::instance = nullptr;
 
 class ManageTasks : public TaskFile {
   // TODO: Use hashmap instead of a vector
-  std::vector<Task> tasks;
-  static int id;
+  int id;
 
 public:
   // Constructor
-  ManageTasks() { readTaskFromFile(tasks); }
+  ManageTasks() {
+    readTasksFromFile();
+    id = tasks.size();
+  }
 
-  // User Interface for the console
+  // User Interface for the console (only for testing)
   void console_ui() {
     using namespace std;
 
@@ -94,13 +119,13 @@ public:
       } break;
 
       case 'q': {
-        // saveTasksToFile()
+        saveTasksToFile();
         cout << "exiting...\n";
         return;
       }
 
       default: {
-        // saveTasksToFile()
+        saveTasksToFile();
         cout << "invalid input....exiting\n";
         return;
       }
@@ -112,7 +137,6 @@ private:
   void addTask(std::string desc) {
     Task task(id++, desc);
     tasks.push_back(task);
-    addTaskToFile(task);
     std::cout << "\n\nTask added\n\n\n";
   }
 
@@ -154,11 +178,9 @@ private:
   }
 };
 
-// Initialize the static variable
-int ManageTasks::id = 0;
-
 int main() {
   ManageTasks myTasks;
+  std::signal(SIGINT, TaskFile::handleSignal);
   myTasks.console_ui();
   return 0;
 }
