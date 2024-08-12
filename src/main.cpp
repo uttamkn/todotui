@@ -27,11 +27,11 @@ protected:
   std::vector<Task> tasks;
   // TODO: Figure out a way to add unique id to tasks (its not unique right now)
 
-  void readTasksFromFile() {
+  int readTasksFromFile() {
     todo_data.open(filepath, std::ios::in);
     std::string line;
+    int id = 0;
     while (getline(todo_data, line)) {
-      int id;
       std::string desc;
 
       // extract id and desc
@@ -46,9 +46,12 @@ protected:
       tasks.push_back(task);
     }
     todo_data.close();
+
+    // return the last id
+    return id;
   }
 
-  void saveTasksToFile() {
+  void writeTasksToFile() {
     // Replace old file
     todo_data.open(filepath, std::ios::out);
 
@@ -64,7 +67,7 @@ protected:
 public:
   // Signal handler
   static void handleSignal(int signal) {
-    instance->saveTasksToFile();
+    instance->writeTasksToFile();
     std::exit(signal);
   }
 
@@ -79,10 +82,7 @@ class ManageTasks : public TaskFile {
 
 public:
   // Constructor
-  ManageTasks() {
-    readTasksFromFile();
-    id = tasks.size();
-  }
+  ManageTasks() { id = readTasksFromFile(); }
 
   // User Interface for the console (only for testing)
   void console_ui() {
@@ -146,13 +146,13 @@ public:
       } break;
 
       case 'q': {
-        saveTasksToFile();
+        writeTasksToFile();
         cout << "\nExiting...\n";
         return;
       }
 
       default: {
-        saveTasksToFile();
+        writeTasksToFile();
         cout << "\nInvalid input. Exiting...\n";
         return;
       }
@@ -162,7 +162,7 @@ public:
 
 private:
   void addTask(std::string desc) {
-    Task task(id++, desc);
+    Task task(++id, desc);
     tasks.push_back(task);
     std::cout << "\n\nTask added\n\n\n";
   }
