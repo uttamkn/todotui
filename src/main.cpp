@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 class Task {
   int id;
@@ -11,6 +11,7 @@ class Task {
   bool completed;
 
 public:
+  Task() {};
   Task(int id, std::string desc, bool completed)
       : id(id), desc(desc), completed(completed) {}
 
@@ -33,7 +34,7 @@ class TaskFile {
   std::string filepath = std::string(home) + "/.cache/todo_data.csv";
 
 protected:
-  std::vector<Task> tasks;
+  std::unordered_map<int, Task> tasks;
 
   int readFromFile() {
     todo_data.open(filepath, std::ios::in);
@@ -56,8 +57,7 @@ protected:
       getline(iss, completed_str, ',');
       completed = (completed_str == "1") ? true : false;
 
-      Task task(id, desc, completed);
-      tasks.push_back(task);
+      tasks[id] = Task(id, desc, completed);
     }
     todo_data.close();
 
@@ -69,8 +69,10 @@ protected:
     // Replace old file
     todo_data.open(filepath, std::ios::out);
 
-    for (const Task task : tasks) {
-      todo_data << task.getTaskCsv() << "\n";
+    auto it = tasks.begin();
+    while (it != tasks.end()) {
+      todo_data << it->second.getTaskCsv() << "\n";
+      it++;
     }
 
     todo_data.close();
@@ -91,7 +93,6 @@ public:
 TaskFile *TaskFile::instance = nullptr;
 
 class ManageTasks : public TaskFile {
-  // TODO: Use hashmap instead of a vector
   int id;
 
 public:
@@ -195,44 +196,41 @@ public:
 
 private:
   void addTask(std::string desc) {
-    Task task(++id, desc, false);
-    tasks.push_back(task);
+    tasks[id] = Task(++id, desc, false);
     std::cout << "\n\nTask added\n\n\n";
   }
 
   void completeTask(int id) {
-    for (Task &task : tasks) {
-      if (task.getTaskId() == id) {
-        task.setComplete();
-        std::cout << "\n\nTask completed\n\n\n";
-        return;
-      }
+    const auto it = tasks.find(id);
+
+    if (it == tasks.end()) {
+      std::cout << "\n\nTask not found\n\n\n";
+      return;
     }
-    std::cout << "\n\nTask not found\n\n\n";
+
+    it->second.setComplete();
   }
 
   void deleteTask(int id) {
-    int i = 0;
-    for (Task &task : tasks) {
-      if (task.getTaskId() == id) {
-        tasks.erase(tasks.begin() + i);
-        std::cout << "\n\nTask deleted\n\n\n";
-        return;
-      }
-      i++;
+    const auto it = tasks.find(id);
+
+    if (it == tasks.end()) {
+      std::cout << "\n\nTask not found\n\n\n";
+      return;
     }
-    std::cout << "\n\nTask not found\n\n\n";
+
+    tasks.erase(it);
   }
 
   void updateTask(int id, std::string desc) {
-    for (Task &task : tasks) {
-      if (task.getTaskId() == id) {
-        task.updateDesc(desc);
-        std::cout << "\n\nTask updated\n\n\n";
-        return;
-      }
+    const auto it = tasks.find(id);
+
+    if (it == tasks.end()) {
+      std::cout << "\n\nTask not found\n\n\n";
+      return;
     }
-    std::cout << "\n\nTask not found\n\n\n";
+
+    it->second.updateDesc(desc);
   }
 
   void displayTasks() {
@@ -246,10 +244,10 @@ private:
     }
 
     int idx = 1;
-    for (Task task : tasks) {
-      std::cout << idx << ". " << task.getTaskDesc()
-                << "(id: " << task.getTaskId() << ") ";
-      std::cout << ((task.isCompleted()) ? "✓" : "✗") << "\n";
+    for (const auto &task : tasks) {
+      std::cout << idx << ". " << task.second.getTaskDesc()
+                << "(id: " << task.second.getTaskId() << ") ";
+      std::cout << ((task.second.isCompleted()) ? "✓" : "✗") << "\n";
       idx++;
     }
 
@@ -262,5 +260,6 @@ int main() {
   ManageTasks myTasks;
   std::signal(SIGINT, TaskFile::handleSignal);
   myTasks.console_ui();
+
   return 0;
 }
