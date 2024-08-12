@@ -9,4 +9,4 @@ set(SOURCES src/Task.cpp src/TaskFileHandler.cpp src/TaskManager.cpp
 
 add_executable(todo_app ${SOURCES})
 
-target_include_directories(todo_app PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(todo_app PRIVATE ${PROJECT_SOURCE_DIR}/include)
