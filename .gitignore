@@ -1,4 +1,5 @@
 test.cpp
 *.out
 *.o
+.cache/
 build/
