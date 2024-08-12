@@ -25,7 +25,6 @@ class TaskFile {
 
 protected:
   std::vector<Task> tasks;
-  // TODO: Figure out a way to add unique id to tasks (its not unique right now)
 
   int readTasksFromFile() {
     todo_data.open(filepath, std::ios::in);
