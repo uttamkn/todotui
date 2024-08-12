@@ -1,6 +1,6 @@
 # Todotui
 
-A simple command-line todo application written in C++.
+Todotui is a C++ command-line to-do application that utilizes the ftxui library for the UI.
 
 ## Building the Project
 
