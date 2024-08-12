@@ -8,6 +8,22 @@ set(SOURCES src/Task.cpp src/TaskFileHandler.cpp src/TaskManager.cpp
             src/main.cpp)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# ftxui
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(
+  ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+  GIT_TAG main
+  SOURCE_DIR ${CMAKE_BINARY_DIR}/external/ftxui)
+FetchContent_MakeAvailable(ftxui)
+
 add_executable(todotui ${SOURCES})
+
+target_link_libraries(
+  todotui
+  PRIVATE ftxui::screen
+  PRIVATE ftxui::dom
+  PRIVATE ftxui::component)
 
 target_include_directories(todotui PRIVATE ${PROJECT_SOURCE_DIR}/include)
