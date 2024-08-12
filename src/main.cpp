@@ -8,40 +8,55 @@
 class Task {
   int id;
   std::string desc;
+  bool completed;
 
 public:
-  Task(int id, std::string desc) : id(id), desc(desc) {}
+  Task(int id, std::string desc, bool completed)
+      : id(id), desc(desc), completed(completed) {}
+
   int getTaskId() const { return id; }
   std::string getTaskDesc() const { return desc; }
-  std::string getTask() const {
-    return std::to_string(id).append(" ").append(desc);
+  bool isCompleted() const { return completed; }
+  std::string getTaskCsv() const {
+    return std::to_string(id).append(",").append(desc).append(",").append(
+        std::to_string(int(completed)));
   }
+
+  void setComplete() { this->completed = true; }
+  void updateDesc(std::string desc) { this->desc = desc; }
 };
 
 class TaskFile {
+  // TODO: Switch to json
   std::fstream todo_data;
   const char *home = std::getenv("HOME");
-  std::string filepath = std::string(home) + "/.cache/todo_data.txt";
+  std::string filepath = std::string(home) + "/.cache/todo_data.csv";
 
 protected:
   std::vector<Task> tasks;
 
-  int readTasksFromFile() {
+  int readFromFile() {
     todo_data.open(filepath, std::ios::in);
     std::string line;
     int id = 0;
     while (getline(todo_data, line)) {
       std::string desc;
+      bool completed;
 
-      // extract id and desc
+      // extract id, desc and completed status
       std::istringstream iss(line);
-      iss >> id;
-      std::getline(iss, desc);
-      if (!desc.empty() && desc[0] == ' ') {
-        desc.erase(desc.begin());
-      }
 
-      Task task(id, desc);
+      std::string id_str;
+      getline(iss, id_str, ',');
+      id = std::stoi(id_str);
+
+      getline(iss, desc, ',');
+
+      std::string completed_str;
+      getline(iss, completed_str, ',');
+      completed = (completed_str == "1") ? true : false;
+
+      Task task(id, desc, completed);
       tasks.push_back(task);
     }
     todo_data.close();
@@ -50,12 +65,12 @@ protected:
     return id;
   }
 
-  void writeTasksToFile() {
+  void writeToFile() {
     // Replace old file
     todo_data.open(filepath, std::ios::out);
 
     for (const Task task : tasks) {
-      todo_data << task.getTask() << "\n";
+      todo_data << task.getTaskCsv() << "\n";
     }
 
     todo_data.close();
@@ -66,7 +81,7 @@ protected:
 public:
   // Signal handler
   static void handleSignal(int signal) {
-    instance->writeTasksToFile();
+    instance->writeToFile();
     std::exit(signal);
   }
 
@@ -81,7 +96,7 @@ class ManageTasks : public TaskFile {
 
 public:
   // Constructor
-  ManageTasks() { id = readTasksFromFile(); }
+  ManageTasks() { id = readFromFile(); }
 
   // User Interface for the console (only for testing)
   void console_ui() {
@@ -89,15 +104,18 @@ public:
 
     while (true) {
       displayTasks();
+
       cout << "=========================== Options "
               "===========================\n";
       cout << "a - Add a task\n";
+      cout << "c - Mark a task as completed\n";
       cout << "d - Delete a task\n";
       cout << "u - Update a task\n";
       cout << "q - Quit\n";
       cout << "==============================================================="
               "\n";
       cout << "Please enter your choice: ";
+
       string choice;
       getline(cin, choice);
       switch (choice[0]) {
@@ -107,6 +125,22 @@ public:
         getline(cin, taskDesc);
         addTask(taskDesc);
         cout << "\nTask added successfully.\n\n";
+      } break;
+
+      case 'c': {
+        string input_id_str;
+        int input_id;
+        cout << "\nEnter the task id u want to mark as completed: ";
+        getline(cin, input_id_str);
+
+        try {
+          input_id = stoi(input_id_str);
+        } catch (exception &ex) {
+          cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
+          continue;
+        }
+
+        completeTask(input_id);
       } break;
 
       case 'd': {
@@ -145,13 +179,13 @@ public:
       } break;
 
       case 'q': {
-        writeTasksToFile();
+        writeToFile();
         cout << "\nExiting...\n";
         return;
       }
 
       default: {
-        writeTasksToFile();
+        writeToFile();
         cout << "\nInvalid input. Exiting...\n";
         return;
       }
@@ -161,14 +195,25 @@ public:
 
 private:
   void addTask(std::string desc) {
-    Task task(++id, desc);
+    Task task(++id, desc, false);
     tasks.push_back(task);
     std::cout << "\n\nTask added\n\n\n";
   }
 
+  void completeTask(int id) {
+    for (Task &task : tasks) {
+      if (task.getTaskId() == id) {
+        task.setComplete();
+        std::cout << "\n\nTask completed\n\n\n";
+        return;
+      }
+    }
+    std::cout << "\n\nTask not found\n\n\n";
+  }
+
   void deleteTask(int id) {
     int i = 0;
-    for (Task task : tasks) {
+    for (Task &task : tasks) {
       if (task.getTaskId() == id) {
         tasks.erase(tasks.begin() + i);
         std::cout << "\n\nTask deleted\n\n\n";
@@ -180,15 +225,12 @@ private:
   }
 
   void updateTask(int id, std::string desc) {
-    Task newTask(id, desc);
-    int i = 0;
-    for (Task task : tasks) {
+    for (Task &task : tasks) {
       if (task.getTaskId() == id) {
-        tasks[i] = newTask;
+        task.updateDesc(desc);
         std::cout << "\n\nTask updated\n\n\n";
         return;
       }
-      i++;
     }
     std::cout << "\n\nTask not found\n\n\n";
   }
@@ -206,8 +248,8 @@ private:
     int idx = 1;
     for (Task task : tasks) {
       std::cout << idx << ". " << task.getTaskDesc()
-                << "(id: " << task.getTaskId() << ")"
-                << "\n";
+                << "(id: " << task.getTaskId() << ") ";
+      std::cout << ((task.isCompleted()) ? "✓" : "✗") << "\n";
       idx++;
     }
 
