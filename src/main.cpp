@@ -23,11 +23,11 @@ public:
         std::to_string(int(completed)));
   }
 
-  void setComplete() { this->completed = true; }
+  void markAsCompleted() { this->completed = true; }
   void updateDesc(std::string desc) { this->desc = desc; }
 };
 
-class TaskFile {
+class TaskFileHandler {
   // TODO: Switch to json
   std::fstream todo_data;
   const char *home = std::getenv("HOME");
@@ -78,7 +78,7 @@ protected:
     todo_data.close();
   }
 
-  static TaskFile *instance;
+  static TaskFileHandler *instance;
 
 public:
   // Signal handler
@@ -87,12 +87,12 @@ public:
     std::exit(signal);
   }
 
-  TaskFile() { instance = this; }
+  TaskFileHandler() { instance = this; }
 };
 
-TaskFile *TaskFile::instance = nullptr;
+TaskFileHandler *TaskFileHandler::instance = nullptr;
 
-class ManageTasks : public TaskFile {
+class ManageTasks : public TaskFileHandler {
   int id;
 
 public:
@@ -104,7 +104,7 @@ public:
     using namespace std;
 
     while (true) {
-      displayTasks();
+      printTasks();
 
       cout << "=========================== Options "
               "===========================\n";
@@ -208,7 +208,7 @@ private:
       return;
     }
 
-    it->second.setComplete();
+    it->second.markAsCompleted();
   }
 
   void deleteTask(int id) {
@@ -233,7 +233,7 @@ private:
     it->second.updateDesc(desc);
   }
 
-  void displayTasks() {
+  void printTasks() {
     std::cout << "=========================== TODOs "
                  "==============================\n";
     if (tasks.size() == 0) {
@@ -258,7 +258,7 @@ private:
 
 int main() {
   ManageTasks myTasks;
-  std::signal(SIGINT, TaskFile::handleSignal);
+  std::signal(SIGINT, TaskFileHandler::handleSignal);
   myTasks.console_ui();
 
   return 0;
