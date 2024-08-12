@@ -2,7 +2,6 @@
 #define TASKMANAGER_H
 
 #include "TaskFileHandler.h"
-#include <iostream>
 
 class TaskManager : public TaskFileHandler {
   int id;

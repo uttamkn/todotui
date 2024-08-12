@@ -1,6 +1,7 @@
 #include "TaskFileHandler.h"
 #include <iostream>
 #include <sstream>
+// TODO: Use json for serialization
 
 // Initialize static member
 TaskFileHandler *TaskFileHandler::instance = nullptr;
