@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SOURCES src/Task.cpp src/TaskFileHandler.cpp src/TaskManager.cpp
             src/main.cpp)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(todo_app ${SOURCES})
 
