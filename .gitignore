@@ -1,2 +1,4 @@
 test.cpp
-a.out
+*.out
+*.o
+build/
