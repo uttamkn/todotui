@@ -1,42 +1,35 @@
 #include "TaskFileHandler.h"
 #include <iostream>
-#include <sstream>
-// TODO: Use json for serialization
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 // Initialize static member
 TaskFileHandler *TaskFileHandler::instance = nullptr;
 
+// Constructor
 TaskFileHandler::TaskFileHandler() { instance = this; }
 
 int TaskFileHandler::readFromFile() {
   todo_data.open(filepath, std::ios::in);
+  json json_data;
 
   if (!todo_data) {
-    std::cerr << "Error opening file\n";
+    std::cerr << "Error opening file while reading\n";
     return -1;
   }
 
-  std::string line;
+  todo_data >> json_data;
+
   int id = 0;
-  while (getline(todo_data, line)) {
-    std::string desc;
-    bool completed;
-
-    // extract id, desc and completed status
-    std::istringstream iss(line);
-
-    std::string id_str;
-    getline(iss, id_str, ',');
+  // Read json file
+  for (const auto &[id_str, task] : json_data.items()) {
     id = std::stoi(id_str);
-
-    getline(iss, desc, ',');
-
-    std::string completed_str;
-    getline(iss, completed_str, ',');
-    completed = (completed_str == "1") ? true : false;
+    std::string desc = task["desc"];
+    bool completed = task["completed"];
 
     tasks[id] = Task(id, desc, completed);
   }
+
   todo_data.close();
 
   // return the last id
@@ -45,16 +38,21 @@ int TaskFileHandler::readFromFile() {
 
 void TaskFileHandler::writeToFile() {
   // Replace old file
-  todo_data.open(filepath, std::ios::out);
+  json json_data;
+  todo_data.open(filepath, std::ios::out | std::ios::trunc);
 
   if (!todo_data) {
-    std::cerr << "Error opening file\n";
+    std::cerr << "Error opening file while writing\n";
     return;
   }
 
+  // Convert tasks to json
   for (const auto &[id, task] : tasks) {
-    todo_data << task.getTaskCsv() << "\n";
+    json_data[std::to_string(id)] = {{"desc", task.getTaskDesc()},
+                                     {"completed", task.isCompleted()}};
   }
+
+  todo_data << json_data.dump(4);
 
   todo_data.close();
 }

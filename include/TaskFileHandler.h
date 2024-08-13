@@ -8,7 +8,7 @@
 class TaskFileHandler {
   std::fstream todo_data;
   const char *home = std::getenv("HOME");
-  std::string filepath = std::string(home) + "/.cache/todo_data.csv";
+  std::string filepath = std::string(home) + "/.cache/todo_data.json";
 
 protected:
   std::unordered_map<int, Task> tasks;
@@ -23,5 +23,4 @@ public:
   // Signal handler
   static void handleSignal(int signal);
 };
-
 #endif

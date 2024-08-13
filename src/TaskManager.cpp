@@ -41,6 +41,7 @@ void TaskManager::updateTask(int id, std::string desc) {
   it->second.updateDesc(desc);
 }
 
+// Only for testing
 void TaskManager::printTasks() {
   std::cout << "=========================== TODOs "
                "==============================\n";
@@ -52,10 +53,10 @@ void TaskManager::printTasks() {
   }
 
   int idx = 1;
-  for (const auto &task : tasks) {
-    std::cout << idx << ". " << task.second.getTaskDesc()
-              << "(id: " << task.second.getTaskId() << ") ";
-    std::cout << ((task.second.isCompleted()) ? "✓" : "✗") << "\n";
+  for (const auto &[id, task] : tasks) {
+    std::cout << idx << ". " << task.getTaskDesc()
+              << "(id: " << task.getTaskId() << ") ";
+    std::cout << ((task.isCompleted()) ? "✓" : "✗") << "\n";
     idx++;
   }
 
@@ -63,7 +64,6 @@ void TaskManager::printTasks() {
                "===\n\n";
 }
 
-// Only for testing
 void TaskManager::console_ui() {
 
   while (true) {
