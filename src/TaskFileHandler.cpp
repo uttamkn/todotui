@@ -7,15 +7,17 @@ using json = nlohmann::json;
 TaskFileHandler *TaskFileHandler::instance = nullptr;
 
 // Constructor
-TaskFileHandler::TaskFileHandler() { instance = this; }
+TaskFileHandler::TaskFileHandler(TaskRepository &repository)
+    : repository(repository) {
+  instance = this;
+}
 
 int TaskFileHandler::readFromFile() {
   todo_data.open(filepath, std::ios::in);
   json json_data;
 
   if (!todo_data) {
-    std::cerr << "Error opening file while reading\n";
-    return -1;
+    throw std::runtime_error("Error opening file while reading");
   }
 
   todo_data >> json_data;
@@ -27,7 +29,7 @@ int TaskFileHandler::readFromFile() {
     std::string desc = task["desc"];
     bool completed = task["completed"];
 
-    tasks[id] = Task(id, desc, completed);
+    repository.addTask(Task(id, desc, completed));
   }
 
   todo_data.close();
@@ -42,12 +44,11 @@ void TaskFileHandler::writeToFile() {
   todo_data.open(filepath, std::ios::out | std::ios::trunc);
 
   if (!todo_data) {
-    std::cerr << "Error opening file while writing\n";
-    return;
+    throw std::runtime_error("Error opening file while writing");
   }
 
   // Convert tasks to json
-  for (const auto &[id, task] : tasks) {
+  for (const auto &[id, task] : repository.getTasks()) {
     json_data[std::to_string(id)] = {{"desc", task.getTaskDesc()},
                                      {"completed", task.isCompleted()}};
   }

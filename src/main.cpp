@@ -1,10 +1,10 @@
-#include "TaskManager.h"
+#include "TaskUI.h"
 #include <csignal>
 
 int main() {
-  TaskManager myTasks;
+  TaskUI taskUI;
   std::signal(SIGINT, TaskFileHandler::handleSignal);
-  myTasks.console_ui();
+  taskUI.console_ui();
 
   return 0;
 }
