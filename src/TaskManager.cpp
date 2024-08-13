@@ -65,43 +65,43 @@ void TaskManager::printTasks() {
 
 // Only for testing
 void TaskManager::console_ui() {
-  using namespace std;
 
   while (true) {
     printTasks();
 
-    cout << "=========================== Options "
-            "===========================\n";
-    cout << "a - Add a task\n";
-    cout << "c - Mark a task as completed\n";
-    cout << "d - Delete a task\n";
-    cout << "u - Update a task\n";
-    cout << "q - Quit\n";
-    cout << "==============================================================="
-            "\n";
-    cout << "Please enter your choice: ";
+    std::cout << "=========================== Options "
+                 "===========================\n";
+    std::cout << "a - Add a task\n";
+    std::cout << "c - Mark a task as completed\n";
+    std::cout << "d - Delete a task\n";
+    std::cout << "u - Update a task\n";
+    std::cout << "q - Quit\n";
+    std::cout
+        << "==============================================================="
+           "\n";
+    std::cout << "Please enter your choice: ";
 
-    string choice;
-    getline(cin, choice);
+    std::string choice;
+    getline(std::cin, choice);
     switch (choice[0]) {
     case 'a': {
-      string taskDesc;
-      cout << "\nEnter the task description: ";
-      getline(cin, taskDesc);
+      std::string taskDesc;
+      std::cout << "\nEnter the task description: ";
+      getline(std::cin, taskDesc);
       addTask(taskDesc);
-      cout << "\nTask added successfully.\n\n";
+      std::cout << "\nTask added successfully.\n\n";
     } break;
 
     case 'c': {
-      string input_id_str;
+      std::string input_id_str;
       int input_id;
-      cout << "\nEnter the task id u want to mark as completed: ";
-      getline(cin, input_id_str);
+      std::cout << "\nEnter the task id u want to mark as completed: ";
+      getline(std::cin, input_id_str);
 
       try {
         input_id = stoi(input_id_str);
-      } catch (exception &ex) {
-        cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
+      } catch (std::exception &ex) {
+        std::cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
         continue;
       }
 
@@ -109,15 +109,15 @@ void TaskManager::console_ui() {
     } break;
 
     case 'd': {
-      string input_id_str;
+      std::string input_id_str;
       int input_id;
-      cout << "\nEnter the task id u want to delete: ";
-      getline(cin, input_id_str);
+      std::cout << "\nEnter the task id u want to delete: ";
+      getline(std::cin, input_id_str);
 
       try {
         input_id = stoi(input_id_str);
-      } catch (exception &ex) {
-        cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
+      } catch (std::exception &ex) {
+        std::cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
         continue;
       }
 
@@ -125,18 +125,18 @@ void TaskManager::console_ui() {
     } break;
 
     case 'u': {
-      string input_id_str;
+      std::string input_id_str;
       int input_id;
-      string input_desc;
-      cout << "\nEnter the task id u want to update: ";
-      getline(cin, input_id_str);
-      cout << "Enter the new description: ";
-      getline(cin, input_desc);
+      std::string input_desc;
+      std::cout << "\nEnter the task id u want to update: ";
+      getline(std::cin, input_id_str);
+      std::cout << "Enter the new description: ";
+      getline(std::cin, input_desc);
 
       try {
         input_id = stoi(input_id_str);
-      } catch (exception &ex) {
-        cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
+      } catch (std::exception &ex) {
+        std::cout << "\nInvalid id. Please enter a valid numeric id.\n\n";
         continue;
       }
 
@@ -145,13 +145,13 @@ void TaskManager::console_ui() {
 
     case 'q': {
       writeToFile();
-      cout << "\nExiting...\n";
+      std::cout << "\nExiting...\n";
       return;
     }
 
     default: {
       writeToFile();
-      cout << "\nInvalid input. Exiting...\n";
+      std::cout << "\nInvalid input. Exiting...\n";
       return;
     }
     }
