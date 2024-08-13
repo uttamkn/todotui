@@ -3,6 +3,8 @@
 
 #include "TaskManager.h"
 
+// TODO: Get started with FTXUI
+
 class TaskUI {
   int id;
   TaskManager taskManager;
