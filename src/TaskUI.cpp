@@ -3,7 +3,7 @@
 
 TaskUI::TaskUI() : taskManager() {}
 
-void TaskUI::console_ui() {
+void TaskUI::consoleUI() {
   while (true) {
     taskManager.printTasks();
 

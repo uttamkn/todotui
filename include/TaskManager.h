@@ -1,13 +1,10 @@
 #ifndef TASKMANAGER_H
 #define TASKMANAGER_H
 
-#include "TaskFileHandler.h"
-#include "TaskRepository.h"
+#include <string>
 
 class TaskManager {
   int id;
-  TaskRepository repository;
-  TaskFileHandler fileHandler;
 
 public:
   TaskManager();
@@ -17,5 +14,8 @@ public:
   void updateTask(int id, std::string desc);
   void saveTasks();
   void printTasks();
+
+  // Signal handler
+  static void handleSignal(int signal);
 };
 #endif

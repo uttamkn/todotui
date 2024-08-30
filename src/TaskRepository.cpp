@@ -5,8 +5,14 @@ TaskRepository::TaskRepository() {}
 
 int TaskRepository::getSize() { return tasks.size(); }
 
-void TaskRepository::addTask(Task task) {
+void TaskRepository::addTask(const Task &task) {
   this->tasks[task.getTaskId()] = task;
+}
+
+// Singleton
+TaskRepository *TaskRepository::getInstance() {
+  static TaskRepository instance;
+  return &instance;
 }
 
 std::unordered_map<int, Task> &TaskRepository::getTasks() { return tasks; }

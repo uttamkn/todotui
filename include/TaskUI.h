@@ -13,6 +13,6 @@ public:
   TaskUI();
 
   // User Interface for the console (only for testing)
-  void console_ui();
+  void consoleUI();
 };
 #endif

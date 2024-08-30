@@ -28,6 +28,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 add_executable(todotui ${SOURCES})
+
 target_link_libraries(
   todotui
   PRIVATE ftxui::screen
