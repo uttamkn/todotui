@@ -1,16 +1,16 @@
 #include "TaskFileHandler.h"
+#include "TaskRepository.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-// Initialize static member
-TaskFileHandler *TaskFileHandler::instance = nullptr;
-
-// Constructor
-TaskFileHandler::TaskFileHandler(TaskRepository &repository)
-    : repository(repository) {
-  instance = this;
+// Singleton
+TaskFileHandler *TaskFileHandler::getInstance() {
+  static TaskFileHandler instance;
+  return &instance;
 }
+
+TaskFileHandler::TaskFileHandler() {}
 
 int TaskFileHandler::readFromFile() {
   todo_data.open(filepath, std::ios::in);
@@ -29,7 +29,7 @@ int TaskFileHandler::readFromFile() {
     std::string desc = task["desc"];
     bool completed = task["completed"];
 
-    repository.addTask(Task(id, desc, completed));
+    TaskRepository::getInstance()->addTask(Task(id, desc, completed));
   }
 
   todo_data.close();
@@ -48,7 +48,7 @@ void TaskFileHandler::writeToFile() {
   }
 
   // Convert tasks to json
-  for (const auto &[id, task] : repository.getTasks()) {
+  for (const auto &[id, task] : TaskRepository::getInstance()->getTasks()) {
     json_data[std::to_string(id)] = {{"desc", task.getTaskDesc()},
                                      {"completed", task.isCompleted()}};
   }
@@ -56,10 +56,4 @@ void TaskFileHandler::writeToFile() {
   todo_data << json_data.dump(4);
 
   todo_data.close();
-}
-
-// Signal handler
-void TaskFileHandler::handleSignal(int signal) {
-  instance->writeToFile();
-  std::exit(signal);
 }

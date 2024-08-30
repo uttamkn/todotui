@@ -9,10 +9,10 @@ class TaskRepository {
 
 public:
   TaskRepository();
-  TaskRepository(int id);
 
+  static TaskRepository *getInstance();
   int getSize();
-  void addTask(Task task);
+  void addTask(const Task &task);
   std::unordered_map<int, Task> &getTasks();
   Task &getTaskById(int id);
   void deleteTaskById(int id);
