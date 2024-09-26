@@ -1,7 +1,5 @@
 # Todotui
 
-Todotui is a C++ command-line to-do application that is built using [FTXUI](https://github.com/ArthurSonzogni/FTXUI).
-
 ## Building the Project
 
 Follow these steps to build the project:
